@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarBloom ✨ | Cute Habit & Sticker Reward Tracker</title>
+    <!-- Google Fonts: Plus Jakarta Sans & Fredoka -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        cute: ['"Fredoka"', 'sans-serif'],
+                    },
+                    colors: {
+                        cream: '#FFFDF9',
+                        blush: '#FFE8F0',
+                        rosePastel: '#FF85B3',
+                        lavenderPastel: '#EFE9FF',
+                        purpleSoft: '#9D7BFF',
+                        mintPastel: '#E3FCEF',
+                        mintAccent: '#36B37E',
+                        peachPastel: '#FFF0E5',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFFDF9;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(255, 232, 240, 0.75) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(239, 233, 255, 0.75) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(227, 252, 239, 0.65) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #3B3355;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.86);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1.5px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 30px -10px rgba(157, 123, 255, 0.14);
+        }
+
+        .cute-shadow-pink {
+            box-shadow: 0 5px 0 #F472B6;
+        }
+        .cute-shadow-pink:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #F472B6;
+        }
+
+        .cute-shadow-purple {
+            box-shadow: 0 5px 0 #7C3AED;
+        }
+        .cute-shadow-purple:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #7C3AED;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float 3.2s ease-in-out infinite;
+        }
+
+        @keyframes shakeBox {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            20% { transform: rotate(-12deg) scale(1.1); }
+            40% { transform: rotate(12deg) scale(1.1); }
+            60% { transform: rotate(-10deg) scale(1.15); }
+            80% { transform: rotate(10deg) scale(1.15); }
+        }
+        .animate-gacha-shake {
+            animation: shakeBox 0.55s ease-in-out infinite;
+        }
+
+        @keyframes popHeart {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            100% { opacity: 0; transform: translateY(-35px) scale(1.4); }
+        }
+        .heart-pop {
+            animation: popHeart 0.9s ease-out forwards;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E2D9F3;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="min-h-screen antialiased pb-24 md:pb-14">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-xs w-full pointer-events-none"></div>
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 glass-card border-b border-pink-100/90 px-4 sm:px-8 py-3">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-2.5 cursor-pointer" data-tab-target="utama">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-400 to-purple-500 flex items-center justify-center text-white shadow-md text-lg">
+                    ✨
+                </div>
+                <div>
+                    <h1 class="font-cute text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent tracking-tight">
+                        StarBloom
+                    </h1>
+                    <p class="text-[11px] font-medium text-purple-400 -mt-1 hidden sm:block">Habit & Sticker Club ✨</p>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation Tabs -->
+            <nav class="hidden md:flex items-center gap-1.5 bg-pink-50/80 p-1.5 rounded-2xl border border-pink-100" id="desktopNavTabs">
+                <button type="button" data-tab="utama" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-pink-600 shadow-sm">
+                    🏠 Utama
+                </button>
+                <button type="button" data-tab="kalendar" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-pink-500">
+                    📅 Kalendar
+                </button>
+                <button type="button" data-tab="sticker" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-pink-500">
+                    📒 Koleksi Sticker
+                </button>
+                <button type="button" data-tab="kawan" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-pink-500">
+                    👯‍♀️ Kawan
+                </button>
+            </nav>
+
+            <!-- Right Controls: Star Wallet, Add Friend & Afif Profile -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Star Balance Pill -->
+                <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-full shadow-sm">
+                    <span class="text-base">⭐</span>
+                    <div class="flex flex-col leading-none">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-amber-600/80">My Stars</span>
+                        <span id="starBalanceDisplay" class="font-cute font-bold text-base text-amber-600">24</span>
+                    </div>
+                </div>
+
+                <!-- Invite Friend Button -->
+                <button type="button" id="openInviteBtn" class="flex items-center gap-1.5 bg-lavenderPastel hover:bg-purple-200/80 text-purple-700 font-bold text-xs px-3.5 py-2 rounded-full transition cursor-pointer border border-purple-200">
+                    <span>➕</span>
+                    <span class="hidden sm:inline">Add Friend</span>
+                </button>
+
+                <!-- User Profile Pill -->
+                <div class="flex items-center gap-2 pl-1.5 pr-3 py-1 bg-white rounded-full border border-pink-100 shadow-sm" title="Featured Sticker: Labubu Bunny">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-bold text-sm relative">
+                        A
+                        <span id="headerFeaturedSticker" class="absolute -bottom-1 -right-1 text-xs bg-white rounded-full shadow px-0.5">🐰</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700 hidden sm:inline">Afif</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 glass-card border-t border-pink-100 px-2 py-2 flex justify-around items-center" id="mobileNavTabs">
+        <button type="button" data-tab="utama" class="nav-tab-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-pink-600 bg-pink-50 cursor-pointer">
+            <span class="text-base">🏠</span>
+            <span>Utama</span>
+        </button>
+        <button type="button" data-tab="kalendar" class="nav-tab-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-500 cursor-pointer">
+            <span class="text-base">📅</span>
+            <span>Kalendar</span>
+        </button>
+        <button type="button" data-tab="sticker" class="nav-tab-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-500 cursor-pointer">
+            <span class="text-base">📒</span>
+            <span>Sticker</span>
+        </button>
+        <button type="button" data-tab="kawan" class="nav-tab-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-500 cursor-pointer">
+            <span class="text-base">👯‍♀️</span>
+            <span>Kawan</span>
+        </button>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
+
+        <!-- ========================================================= -->
+        <!-- VIEW 1: UTAMA (DASHBOARD)                                 -->
+        <!-- ========================================================= -->
+        <div id="view-utama" class="tab-view space-y-6">
+            
+            <!-- Hero Row: Welcome Banner + Streak Pet Widget -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- Welcome & Monthly Goal Overview Card -->
+                <div class="lg:col-span-2 glass-card rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-8 -top-8 w-40 h-40 bg-pink-200/40 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="absolute right-20 -bottom-10 w-36 h-36 bg-purple-200/40 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <div class="relative z-10 flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 bg-pink-100/90 text-pink-600 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                                <span>🌷 Cabaran 30 Hari • November</span>
+                            </div>
+                            <h2 class="font-cute text-2xl sm:text-3xl font-bold text-slate-800 leading-snug">
+                                Hai Afif! Jom kumpul bintang hari ni ✨
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1 max-w-xl">
+                                Siapkan target harian awak dengan <span class="font-bold text-pink-500">Yammy</span> & kawan-kawan. Kumpul 3 ⭐ untuk buka Mystery Sticker Box!
+                            </p>
+                        </div>
+
+                        <!-- Demo Reset Button so Afif/Yammy can test claiming repeatedly -->
+                        <button type="button" id="resetDemoBtn" class="text-[11px] font-semibold bg-white/90 hover:bg-pink-50 text-slate-500 hover:text-pink-600 border border-slate-200 px-3 py-1.5 rounded-full transition cursor-pointer" title="Reset status claim hari ini untuk cuba demo semula">
+                            🔄 Reset Hari Ini (Demo)
+                        </button>
+                    </div>
+
+                    <!-- Monthly Progress Bar -->
+                    <div class="relative z-10 mt-6 bg-white/90 rounded-2xl p-4 border border-pink-100">
+                        <div class="flex items-center justify-between text-xs font-bold mb-2">
+                            <span class="text-slate-600 flex items-center gap-1.5">
+                                🏆 Target Bulan Ini (30 Hari)
+                            </span>
+                            <span id="monthlyProgressText" class="text-pink-600">18 / 30 Hari (60%)</span>
+                        </div>
+                        <div class="w-full h-3.5 bg-pink-100 rounded-full overflow-hidden p-0.5">
+                            <div id="monthlyProgressBar" class="h-full bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 rounded-full transition-all duration-500" style="width: 60%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Virtual Streak Pet Widget ("Mochi") -->
+                <div class="glass-card rounded-3xl p-6 bg-gradient-to-b from-amber-50/80 to-pink-50/80 flex flex-col items-center justify-between text-center relative overflow-hidden">
+                    <div class="w-full flex items-center justify-between">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-purple-600 bg-purple-100 px-2.5 py-1 rounded-full">
+                            Streak Pet
+                        </span>
+                        <div class="flex items-center gap-1 bg-orange-100 text-orange-600 font-cute font-bold text-sm px-3 py-1 rounded-full border border-orange-200">
+                            <span>🔥</span>
+                            <span id="streakCountDisplay">14</span>
+                            <span>Hari</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Pet Stage -->
+                    <div id="petStageContainer" class="relative my-2 animate-float cursor-pointer select-none" title="Klik untuk usap Mochi!">
+                        <svg class="w-24 h-24 drop-shadow-md mx-auto" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Ears -->
+                            <rect x="34" y="10" width="16" height="42" rx="8" fill="#FFFFFF" stroke="#F472B6" stroke-width="3"/>
+                            <rect x="38" y="16" width="8" height="28" rx="4" fill="#FBCFE8"/>
+                            <rect x="70" y="10" width="16" height="42" rx="8" fill="#FFFFFF" stroke="#F472B6" stroke-width="3"/>
+                            <rect x="74" y="16" width="8" height="28" rx="4" fill="#FBCFE8"/>
+                            <!-- Head/Body -->
+                            <ellipse cx="60" cy="72" rx="38" ry="34" fill="#FFFFFF" stroke="#F472B6" stroke-width="3"/>
+                            <!-- Cheeks -->
+                            <ellipse cx="38" cy="75" rx="6" ry="4" fill="#FDA4AF" opacity="0.75"/>
+                            <ellipse cx="82" cy="75" rx="6" ry="4" fill="#FDA4AF" opacity="0.75"/>
+                            <!-- Eyes -->
+                            <circle cx="46" cy="66" r="4.5" fill="#3B3355"/>
+                            <circle cx="47.5" cy="64.5" r="1.5" fill="#FFFFFF"/>
+                            <circle cx="74" cy="66" r="4.5" fill="#3B3355"/>
+                            <circle cx="75.5" cy="64.5" r="1.5" fill="#FFFFFF"/>
+                            <!-- Nose & Mouth -->
+                            <path d="M57 73C57 71.5 63 71.5 63 73C63 74.5 60 76 60 76C60 76 57 74.5 57 73Z" fill="#FB7185"/>
+                            <path d="M54 78Q57 81 60 78Q63 81 66 78" stroke="#3B3355" stroke-width="2.2" stroke-linecap="round"/>
+                            <!-- Sprout -->
+                            <path d="M60 38C60 32 67 28 70 32C72 35 66 39 60 38Z" fill="#34D399"/>
+                            <path d="M60 38C60 32 53 28 50 32C48 35 54 39 60 38Z" fill="#6EE7B7"/>
+                        </svg>
+                    </div>
+
+                    <div class="w-full">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <h3 class="font-cute text-base font-bold text-slate-800">Mochi si Bunny 🐰</h3>
+                            <span id="mochiLevelBadge" class="text-[10px] font-bold bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full">Lv. 4</span>
+                        </div>
+                        <p id="petMoodText" class="text-xs text-slate-500 mt-1 min-h-[32px]">
+                            "Yay! 14 hari berturut-turut! Jangan lupa claim star hari ni tau~"
+                        </p>
+                        <!-- Mochi Happiness Bar -->
+                        <div class="mt-2 flex items-center gap-2">
+                            <div class="flex-1 h-2 bg-pink-100 rounded-full overflow-hidden">
+                                <div id="mochiExpBar" class="h-full bg-gradient-to-r from-amber-400 to-pink-400 rounded-full transition-all duration-300" style="width: 70%;"></div>
+                            </div>
+                            <button type="button" id="petMochiBtn" class="text-[11px] font-bold bg-pink-500 hover:bg-pink-600 text-white px-2.5 py-1 rounded-xl transition cursor-pointer">
+                                💖 Usap Mochi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Bento Grid: Left (Habits & Mini Calendar) | Right (Gacha & Mini Leaderboard) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- LEFT COLUMN (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    <!-- 1. Today's Habits & Shared Challenges -->
+                    <div class="glass-card rounded-3xl p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                            <div>
+                                <h3 class="font-cute text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <span>📝</span> Target Harian Afif
+                                </h3>
+                                <p class="text-xs text-slate-500">Klik <span class="font-bold text-pink-500">Claim +1 ⭐</span> lepas siap tugasan!</p>
+                            </div>
+                            <button type="button" id="openAddHabitBtn" class="bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs px-4 py-2.5 rounded-2xl transition flex items-center gap-1.5 cute-shadow-pink cursor-pointer">
+                                <span>➕</span>
+                                <span>Tambah Target</span>
+                            </button>
+                        </div>
+
+                        <!-- Habit List Container -->
+                        <div id="habitListContainer" class="space-y-3"></div>
+                    </div>
+
+                    <!-- 2. 30-Day Progress Calendar Preview -->
+                    <div class="glass-card rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-cute text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <span>📅</span> Rekod 30 Hari (November)
+                                </h3>
+                                <p class="text-xs text-slate-500">Klik mana-mana tarikh untuk tanda / semak rekod</p>
+                            </div>
+                            <button type="button" data-tab-target="kalendar" class="text-xs font-bold text-purple-600 hover:underline cursor-pointer">
+                                Lihat Penuh →
+                            </button>
+                        </div>
+
+                        <div id="calendarGrid" class="grid grid-cols-6 sm:grid-cols-10 gap-2 pt-1"></div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <!-- 3. Sticker Gacha / Mystery Box -->
+                    <div class="glass-card rounded-3xl p-6 border-2 border-purple-200/80 relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 bg-purple-100 px-2.5 py-0.5 rounded-full">
+                                    Reward Gacha
+                                </span>
+                                <h3 class="font-cute text-xl font-bold text-slate-800 mt-1">
+                                    Mystery Sticker Box 🎁
+                                </h3>
+                            </div>
+                            <span class="text-xs font-bold text-purple-600 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full">
+                                Kos: 3 ⭐ / Spin
+                            </span>
+                        </div>
+
+                        <div class="bg-gradient-to-br from-lavenderPastel via-pink-50 to-amber-50 rounded-2xl p-5 text-center border border-purple-100 mb-5">
+                            <div id="gachaBoxVisual" class="w-24 h-24 mx-auto mb-3 bg-white rounded-3xl shadow-md flex items-center justify-center text-5xl border-2 border-pink-200 transition-transform">
+                                🎁
+                            </div>
+                            <p class="text-xs font-medium text-slate-600 mb-3">
+                                Kumpul edisi khas <span class="font-bold text-pink-500">Labubu Bunny</span>, <span class="font-bold text-emerald-600">Matcha Bear</span> & <span class="font-bold text-amber-600">Boba Dino</span>!
+                            </p>
+                            <button type="button" id="spinGachaBtn" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-cute font-bold text-sm py-3 px-5 rounded-2xl transition cute-shadow-purple cursor-pointer flex items-center justify-center gap-2">
+                                <span>✨</span>
+                                <span>Buka Mystery Box (3 ⭐)</span>
+                            </button>
+                        </div>
+
+                        <!-- Mini Sticker Album Preview -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-cute text-sm font-bold text-slate-700">
+                                    📒 Koleksi Sticker (Klik untuk Equip)
+                                </h4>
+                                <span id="stickerCountBadge" class="text-xs font-bold text-pink-600 bg-pink-100 px-2.5 py-0.5 rounded-full">
+                                    4 / 8
+                                </span>
+                            </div>
+                            <div id="stickerAlbumGrid" class="grid grid-cols-4 gap-2.5"></div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Friends Leaderboard -->
+                    <div class="glass-card rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-cute text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <span>👑</span> Carta Kawan
+                                </h3>
+                                <p class="text-xs text-slate-500">Saingan sihat bersama Yammy & geng!</p>
+                            </div>
+                            <button type="button" id="openInviteBtn2" class="text-xs font-bold text-pink-500 hover:underline cursor-pointer">
+                                + Jemput
+                            </button>
+                        </div>
+
+                        <div id="leaderboardList" class="space-y-2.5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 2: KALENDAR 30 HARI (DEDICATED VIEW)                 -->
+        <!-- ========================================================= -->
+        <div id="view-kalendar" class="tab-view hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <span class="text-xs font-bold text-pink-600 bg-pink-100 px-3 py-1 rounded-full">📅 Tracker Bulanan</span>
+                        <h2 class="font-cute text-2xl sm:text-3xl font-bold text-slate-800 mt-2">
+                            Kalendar Cabaran 30 Hari Afif
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Klik mana-mana kotak hari di bawah untuk kemas kini rekod harian awak secara manual.
+                        </p>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 text-center">
+                        <span class="text-xs font-bold text-amber-700 block">Jumlah Hari Selesai</span>
+                        <span id="calendarBigStat" class="font-cute text-2xl font-bold text-amber-600">18 / 30 Hari</span>
+                    </div>
+                </div>
+
+                <!-- Full 30 Day Interactive Grid -->
+                <div id="fullCalendarGrid" class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-3"></div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 3: KOLEKSI STICKER & GACHA (DEDICATED VIEW)          -->
+        <!-- ========================================================= -->
+        <div id="view-sticker" class="tab-view hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 sm:p-8">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <span class="text-xs font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-full">📒 Buku Pelekat Digital</span>
+                        <h2 class="font-cute text-2xl sm:text-3xl font-bold text-slate-800 mt-2">
+                            Koleksi Sticker Comel Afif
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Klik mana-mana sticker yang sudah dibuka untuk jadikan <span class="font-bold text-pink-500">Featured Badge</span> di profil & leaderboard!
+                        </p>
+                    </div>
+                    <button type="button" id="spinGachaBtnFull" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-cute font-bold text-sm py-3 px-6 rounded-2xl transition cute-shadow-purple cursor-pointer flex items-center gap-2">
+                        <span>🎁</span>
+                        <span>Spin Mystery Box (3 ⭐)</span>
+                    </button>
+                </div>
+
+                <div id="fullStickerAlbumGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 4: KAWAN & LEADERBOARD (DEDICATED VIEW)              -->
+        <!-- ========================================================= -->
+        <div id="view-kawan" class="tab-view hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left: Add Friend & Invite Code -->
+                <div class="lg:col-span-5 glass-card rounded-3xl p-6 space-y-5">
+                    <div>
+                        <span class="text-xs font-bold text-purple-600 bg-purple-100 px-3 py-1 rounded-full">👯‍♀️ Social Connector</span>
+                        <h2 class="font-cute text-2xl font-bold text-slate-800 mt-2">Ajak Kawan Bertanding</h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Kongsi kod unik awak dengan Yammy atau tambah rakan baru untuk tengok siapa paling konsisten!
+                        </p>
+                    </div>
+
+                    <div class="bg-purple-50 border-2 border-dashed border-purple-300 rounded-2xl p-4 text-center">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400 block mb-1">Kod Jemputan Afif</span>
+                        <div class="flex items-center justify-center gap-3">
+                            <span class="font-cute text-2xl font-bold tracking-wider text-purple-700">BLOOM-AFIF88</span>
+                            <button type="button" id="copyCodeBtnPage" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition cursor-pointer">
+                                📋 Salin
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="addFriendPageForm" class="space-y-3 pt-2 border-t border-slate-100">
+                        <label class="block text-xs font-bold text-slate-700">Tambah Kawan Baru (Nama atau Kod):</label>
+                        <input type="text" id="friendInputPage" required placeholder="Cth: Damia atau BLOOM-DAMIA99" class="w-full px-4 py-3 rounded-2xl bg-pink-50/50 border border-pink-200 text-sm focus:outline-none focus:border-pink-400">
+                        <button type="submit" class="w-full py-3 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white font-cute font-bold text-sm cute-shadow-pink cursor-pointer">
+                            ➕ Tambah ke Senarai Kawan
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Full Leaderboard -->
+                <div class="lg:col-span-7 glass-card rounded-3xl p-6">
+                    <h3 class="font-cute text-xl font-bold text-slate-800 mb-1">🏆 Kedudukan Kawan & Cabaran</h3>
+                    <p class="text-xs text-slate-500 mb-4">Klik butang ⚡ untuk hantar semangat kepada kawan!</p>
+                    <div id="fullLeaderboardList" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 1: ADD NEW HABIT / TARGET                           -->
+    <!-- ========================================================= -->
+    <div id="addHabitModal" class="fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-cute text-xl font-bold text-slate-800">✨ Cipta Target Baru</h3>
+                <button type="button" data-close-modal="addHabitModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-pink-100 text-slate-500 flex items-center justify-center cursor-pointer font-bold">
+                    ✕
+                </button>
+            </div>
+
+            <form id="addHabitForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">Apa target harian Afif?</label>
+                    <input type="text" id="newHabitTitle" required placeholder="Cth: Baca buku 1 page sehari / Jogging 15 minit" class="w-full px-4 py-3 rounded-2xl bg-pink-50/50 border border-pink-200 text-sm focus:outline-none focus:border-pink-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">Pilih Ikon Comel</label>
+                        <select id="newHabitIcon" class="w-full px-3.5 py-3 rounded-2xl bg-purple-50/50 border border-purple-200 text-sm focus:outline-none">
+                            <option value="📖">📖 Baca Buku</option>
+                            <option value="💧">💧 Minum Air</option>
+                            <option value="🏃‍♂️">🏃‍♂️ Workout / Lari</option>
+                            <option value="🧴">🧴 Skincare</option>
+                            <option value="🎨">🎨 Lukis / Journal</option>
+                            <option value="💰">💰 Simpan Duit</option>
+                            <option value="🕌">🕌 Mengaji / Ibadah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5">Mod Cabaran</label>
+                        <select id="newHabitShared" class="w-full px-3.5 py-3 rounded-2xl bg-mintPastel/50 border border-emerald-200 text-sm focus:outline-none">
+                            <option value="Yammy">👯‍♀️ Bersama Yammy</option>
+                            <option value="Solo">🌸 Target Solo</option>
+                            <option value="Geng">💖 Semua Kawan</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex gap-2.5">
+                    <button type="button" data-close-modal="addHabitModal" class="flex-1 py-3 rounded-2xl bg-slate-100 text-slate-600 font-bold text-sm cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 rounded-2xl bg-pink-500 hover:bg-pink-600 text-white font-cute font-bold text-sm cute-shadow-pink cursor-pointer">
+                        Simpan Target ✨
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 2: INVITE FRIENDS / CONNECTOR                       -->
+    <!-- ========================================================= -->
+    <div id="inviteModal" class="fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-purple-100 text-center">
+            <div class="flex justify-end">
+                <button type="button" data-close-modal="inviteModal" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-purple-100 text-slate-500 flex items-center justify-center cursor-pointer font-bold">
+                    ✕
+                </button>
+            </div>
+            <div class="w-16 h-16 mx-auto bg-lavenderPastel rounded-3xl flex items-center justify-center text-3xl mb-3">
+                👯‍♀️
+            </div>
+            <h3 class="font-cute text-xl font-bold text-slate-800">Ajak Kawan Join Challenge!</h3>
+            <p class="text-xs text-slate-500 mt-1 px-4">
+                Kongsi kod jemputan Afif dengan Yammy atau kawan lain supaya boleh bertanding kumpul star!
+            </p>
+
+            <div class="mt-5 bg-purple-50 border-2 border-dashed border-purple-300 rounded-2xl p-4">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-purple-400 block mb-1">Kod Jemputan Afif</span>
+                <div class="flex items-center justify-center gap-3">
+                    <span id="inviteCodeText" class="font-cute text-2xl font-bold tracking-wider text-purple-700">BLOOM-AFIF88</span>
+                    <button type="button" id="copyInviteCodeBtn" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition cursor-pointer">
+                        📋 Salin
+                    </button>
+                </div>
+            </div>
+
+            <form id="addFriendModalForm" class="mt-4 pt-4 border-t border-slate-100 text-left">
+                <label class="block text-xs font-bold text-slate-600 mb-1.5">Atau masukkan nama / kod kawan:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="friendCodeInputModal" required placeholder="Cth: BLOOM-SARA22 atau Nabila" class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-purple-400">
+                    <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer">
+                        Add
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL 3: STICKER GACHA REVEAL                             -->
+    <!-- ========================================================= -->
+    <div id="stickerRevealModal" class="fixed inset-0 z-50 bg-slate-900/55 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-7 shadow-2xl border-4 border-amber-200 text-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-b from-amber-50/80 via-pink-50/50 to-white pointer-events-none"></div>
+            <div class="relative z-10">
+                <span id="revealedRarityBadge" class="inline-block text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-100 text-amber-700 mb-3">
+                    ✨ LEGENDARY STICKER!
+                </span>
+                <div id="revealedStickerEmoji" class="w-28 h-28 mx-auto my-2 bg-white rounded-3xl shadow-lg border-2 border-pink-200 flex items-center justify-center text-6xl animate-float">
+                    🎁
+                </div>
+                <h3 id="revealedStickerName" class="font-cute text-2xl font-bold text-slate-800 mt-3">
+                    Membuka Kotak...
+                </h3>
+                <p id="revealedStickerDesc" class="text-xs text-slate-500 mt-1">
+                    Tunggu sebentar...
+                </p>
+                <button type="button" id="closeRevealBtn" data-close-modal="stickerRevealModal" class="mt-6 w-full py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-cute font-bold text-sm cute-shadow-pink cursor-pointer">
+                    Simpan Dalam Album 💖
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- COMPLETE WORKING JAVASCRIPT                               -->
+    <!-- ========================================================= -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const STORAGE_KEY = 'starbloom_afif_v1';
+
+            // Default Initial State
+            const defaultState = {
+                stars: 24,
+                streak: 14,
+                streakClaimedToday: false,
+                featuredStickerEmoji: '🐰',
+                mochiLevel: 4,
+                mochiExp: 70,
+                habits: [
+                    {
+                        id: 1,
+                        title: "Baca buku 1 page sehari",
+                        icon: "📖",
+                        sharedWith: "Yammy",
+                        friendDoneToday: true,
+                        claimedToday: false,
+                        streakDays: 14
+                    },
+                    {
+                        id: 2,
+                        title: "Minum air kosong 2 Liter",
+                        icon: "💧",
+                        sharedWith: "Yammy & Sarah",
+                        friendDoneToday: true,
+                        claimedToday: false,
+                        streakDays: 9
+                    },
+                    {
+                        id: 3,
+                        title: "Night skincare / rehat awal",
+                        icon: "🧴",
+                        sharedWith: "Solo",
+                        friendDoneToday: false,
+                        claimedToday: false,
+                        streakDays: 21
+                    }
+                ],
+                // 30-day calendar status (Day 1 to 18 done by default)
+                calendarDays: Array.from({ length: 30 }, (_, i) => i < 18),
+                stickers: [
+                    { id: 1, name: "Labubu Bunny", emoji: "🐰", rarity: "Legendary", unlocked: true, count: 1 },
+                    { id: 2, name: "Matcha Bear", emoji: "🧸", rarity: "Rare", unlocked: true, count: 2 },
+                    { id: 3, name: "Starry Kitty", emoji: "🐱", rarity: "Common", unlocked: true, count: 1 },
+                    { id: 4, name: "Boba Dino", emoji: "🦕", rarity: "Rare", unlocked: true, count: 1 },
+                    { id: 5, name: "Starry Axolotl", emoji: "🦎", rarity: "Legendary", unlocked: false, count: 0 },
+                    { id: 6, name: "Cloud Alpaca", emoji: "🦙", rarity: "Common", unlocked: false, count: 0 },
+                    { id: 7, name: "Peach Shiba", emoji: "🐶", rarity: "Rare", unlocked: false, count: 0 },
+                    { id: 8, name: "Cyber Bunny", emoji: "🤖", rarity: "Legendary", unlocked: false, count: 0 }
+                ],
+                friends: [
+                    { id: 'f1', name: "Yammy 🔥", stars: 26, streak: 14, avatarBg: "from-purple-400 to-indigo-400", initial: "Y", badge: "🧸", isMe: false, status: "Baru siap baca 1 page! 📖" },
+                    { id: 'me', name: "Afif (Saya)", stars: 24, streak: 14, avatarBg: "from-pink-400 to-rose-500", initial: "A", badge: "🐰", isMe: true, status: "Target 30 hari on track ✨" },
+                    { id: 'f2', name: "Sarah 🌸", stars: 19, streak: 8, avatarBg: "from-emerald-400 to-teal-400", initial: "S", badge: "🐱", isMe: false, status: "Kumpul star untuk Labubu!" },
+                    { id: 'f3', name: "Aina 🎀", stars: 15, streak: 5, avatarBg: "from-amber-400 to-orange-400", initial: "N", badge: "🦕", isMe: false, status: "Jom minum air cukup hari ni" }
+                ]
+            };
+
+            // Load from localStorage or use default
+            let state = loadState();
+
+            function loadState() {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved) {
+                        return JSON.parse(saved);
+                    }
+                } catch (e) {
+                    console.warn("LocalStorage tidak tersedia, guna state sementara.", e);
+                }
+                return JSON.parse(JSON.stringify(defaultState));
+            }
+
+            function saveState() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                } catch (e) {
+                    console.warn("Gagal simpan ke localStorage", e);
+                }
+            }
+
+            // --- TOAST NOTIFICATION SYSTEM ---
+            function showToast(message, type = 'pink') {
+                const container = document.getElementById('toastContainer');
+                if (!container) return;
+
+                const colors = {
+                    pink: 'bg-white border-pink-300 text-slate-800',
+                    purple: 'bg-purple-600 border-purple-700 text-white',
+                    amber: 'bg-amber-500 border-amber-600 text-white',
+                    emerald: 'bg-emerald-500 border-emerald-600 text-white',
+                    error: 'bg-rose-500 border-rose-600 text-white'
+                };
+
+                const toast = document.createElement('div');
+                toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg border-2 text-xs font-bold flex items-center justify-between gap-2 transition-all duration-300 transform translate-x-0 ${colors[type] || colors.pink}`;
+                toast.innerHTML = `<span>${message}</span>`;
+
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(20px)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // --- CONFETTI HELPER ---
+            function fireConfetti() {
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 65,
+                        spread: 70,
+                        origin: { y: 0.65 },
+                        colors: ['#FF85B3', '#9D7BFF', '#FBBF24', '#34D399']
+                    });
+                }
+            }
+
+            // --- MODAL HELPERS ---
+            function openModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            }
+
+            function closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }
+
+            // Close modal buttons
+            document.querySelectorAll('[data-close-modal]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    closeModal(btn.getAttribute('data-close-modal'));
+                });
+            });
+
+            // Close modal when clicking backdrop
+            ['addHabitModal', 'inviteModal', 'stickerRevealModal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('click', (e) => {
+                        if (e.target === el) closeModal(id);
+                    });
+                }
+            });
+
+            // --- TAB NAVIGATION SYSTEM ---
+            function switchTab(tabName) {
+                // Hide all views
+                document.querySelectorAll('.tab-view').forEach(view => {
+                    view.classList.add('hidden');
+                });
+
+                // Show target view
+                const targetView = document.getElementById(`view-${tabName}`);
+                if (targetView) {
+                    targetView.classList.remove('hidden');
+                }
+
+                // Update Desktop & Mobile Tab Button Active States
+                document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+                    const isMatch = btn.getAttribute('data-tab') === tabName;
+                    if (btn.closest('#desktopNavTabs')) {
+                        if (isMatch) {
+                            btn.className = 'nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer bg-white text-pink-600 shadow-sm';
+                        } else {
+                            btn.className = 'nav-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer text-slate-600 hover:text-pink-500';
+                        }
+                    } else if (btn.closest('#mobileNavTabs')) {
+                        if (isMatch) {
+                            btn.className = 'nav-tab-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-pink-600 bg-pink-50 cursor-pointer';
+                        } else {
+                            btn.className = 'nav-tab-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-500 cursor-pointer';
+                        }
+                    }
+                });
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            document.querySelectorAll('[data-tab]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchTab(btn.getAttribute('data-tab'));
+                });
+            });
+
+            document.querySelectorAll('[data-tab-target]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchTab(btn.getAttribute('data-tab-target'));
+                });
+            });
+
+            // --- RENDER FUNCTIONS ---
+            function renderAll() {
+                updateStatsHeader();
+                renderHabits();
+                renderCalendars();
+                renderStickers();
+                renderLeaderboards();
+            }
+
+            function updateStatsHeader() {
+                // Sync Afif's stars & badge in friends array
+                const meObj = state.friends.find(f => f.isMe);
+                if (meObj) {
+                    meObj.stars = state.stars;
+                    meObj.streak = state.streak;
+                    meObj.badge = state.featuredStickerEmoji;
+                }
+
+                document.getElementById('starBalanceDisplay').textContent = state.stars;
+                document.getElementById('streakCountDisplay').textContent = state.streak;
+                document.getElementById('headerFeaturedSticker').textContent = state.featuredStickerEmoji;
+
+                // Mochi Pet stats
+                document.getElementById('mochiLevelBadge').textContent = `Lv. ${state.mochiLevel}`;
+                document.getElementById('mochiExpBar').style.width = `${state.mochiExp}%`;
+
+                // Monthly Progress
+                const completedCount = state.calendarDays.filter(Boolean).length;
+                const percent = Math.round((completedCount / 30) * 100);
+                document.getElementById('monthlyProgressText').textContent = `${completedCount} / 30 Hari (${percent}%)`;
+                document.getElementById('monthlyProgressBar').style.width = `${percent}%`;
+                document.getElementById('calendarBigStat').textContent = `${completedCount} / 30 Hari`;
+            }
+
+            // 1. RENDER HABITS
+            function renderHabits() {
+                const container = document.getElementById('habitListContainer');
+                if (!container) return;
+
+                if (state.habits.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8 bg-pink-50/40 rounded-2xl border border-dashed border-pink-200">
+                            <p class="text-sm font-bold text-slate-600">Tiada target lagi hari ni 🌸</p>
+                            <p class="text-xs text-slate-400 mt-1">Klik "+ Tambah Target" untuk mula kumpul star!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = state.habits.map(habit => {
+                    const isShared = habit.sharedWith !== 'Solo';
+                    const sharedBadge = isShared
+                        ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">👯‍♀️ ${habit.sharedWith}</span>`
+                        : `<span class="inline-flex items-center gap-1 text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">🌸 Solo</span>`;
+
+                    const friendNote = (isShared && habit.friendDoneToday)
+                        ? `<span class="text-[11px] text-emerald-600 font-semibold block mt-0.5">✓ ${habit.sharedWith} dah siap hari ni!</span>`
+                        : '';
+
+                    const actionBtn = habit.claimedToday
+                        ? `<button type="button" disabled class="bg-emerald-100 text-emerald-700 font-cute font-bold text-xs px-4 py-2.5 rounded-2xl border border-emerald-200 cursor-default flex items-center gap-1">
+                               <span>✅</span><span>Selesai!</span>
+                           </button>`
+                        : `<button type="button" data-claim-id="${habit.id}" class="claim-habit-btn bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white font-cute font-bold text-xs px-4 py-2.5 rounded-2xl shadow-sm transition transform active:scale-95 cursor-pointer flex items-center gap-1">
+                               <span>Claim +1 ⭐</span>
+                           </button>`;
+
+                    return `
+                        <div class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 p-4 rounded-2xl bg-white/95 border ${habit.claimedToday ? 'border-emerald-200 bg-emerald-50/20' : 'border-pink-100'} shadow-sm transition">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-2xl bg-pink-50 border border-pink-100 flex items-center justify-center text-2xl shrink-0">
+                                    ${habit.icon}
+                                </div>
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <h4 class="font-bold text-sm text-slate-800 ${habit.claimedToday ? 'line-through text-slate-400' : ''}">${habit.title}</h4>
+                                        ${sharedBadge}
+                                    </div>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-[11px] font-semibold text-orange-500">🔥 ${habit.streakDays} hari berturut-turut</span>
+                                    </div>
+                                    ${friendNote}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 ml-auto">
+                                ${actionBtn}
+                                <button type="button" data-delete-id="${habit.id}" class="delete-habit-btn w-8 h-8 rounded-xl bg-slate-50 hover:bg-rose-100 text-slate-400 hover:text-rose-500 flex items-center justify-center text-xs transition cursor-pointer" title="Padam Target">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Bind Claim Buttons
+                container.querySelectorAll('.claim-habit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = Number(btn.getAttribute('data-claim-id'));
+                        claimHabitReward(id);
+                    });
+                });
+
+                // Bind Delete Buttons
+                container.querySelectorAll('.delete-habit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = Number(btn.getAttribute('data-delete-id'));
+                        deleteHabit(id);
+                    });
+                });
+            }
+
+            function claimHabitReward(habitId) {
+                const habit = state.habits.find(h => h.id === habitId);
+                if (!habit || habit.claimedToday) return;
+
+                habit.claimedToday = true;
+                habit.streakDays += 1;
+                state.stars += 1;
+
+                // Increment global streak once per day
+                if (!state.streakClaimedToday) {
+                    state.streak += 1;
+                    state.streakClaimedToday = true;
+                    // Also mark next uncompleted day in 30-day calendar
+                    const nextEmptyDayIdx = state.calendarDays.findIndex(done => !done);
+                    if (nextEmptyDayIdx !== -1) {
+                        state.calendarDays[nextEmptyDayIdx] = true;
+                    }
+                }
+
+                // Give Mochi some happiness
+                boostMochi(15);
+
+                saveState();
+                renderAll();
+                fireConfetti();
+                showToast(`Yay Afif! Dapat +1 ⭐ untuk "${habit.title}"!`, 'amber');
+            }
+
+            function deleteHabit(habitId) {
+                state.habits = state.habits.filter(h => h.id !== habitId);
+                saveState();
+                renderAll();
+                showToast('Target telah dipadam.', 'pink');
+            }
+
+            // 2. RENDER CALENDARS (Mini + Full)
+            function renderCalendars() {
+                const grids = [
+                    document.getElementById('calendarGrid'),
+                    document.getElementById('fullCalendarGrid')
+                ];
+
+                grids.forEach((grid, gridIdx) => {
+                    if (!grid) return;
+                    const isFull = gridIdx === 1;
+
+                    grid.innerHTML = state.calendarDays.map((isDone, index) => {
+                        const dayNum = index + 1;
+                        if (isDone) {
+                            return `
+                                <button type="button" data-day-idx="${index}" class="cal-day-btn aspect-square rounded-2xl bg-gradient-to-br from-amber-100 to-pink-100 border-2 border-amber-300 flex flex-col items-center justify-center shadow-sm hover:scale-105 transition cursor-pointer">
+                                    <span class="text-[10px] font-bold text-amber-700">H${dayNum}</span>
+                                    <span class="${isFull ? 'text-xl' : 'text-sm'}">⭐</span>
+                                </button>
+                            `;
+                        } else {
+                            return `
+                                <button type="button" data-day-idx="${index}" class="cal-day-btn aspect-square rounded-2xl bg-white/70 border border-slate-200 hover:border-pink-300 flex flex-col items-center justify-center text-slate-400 hover:text-pink-500 transition cursor-pointer">
+                                    <span class="text-[11px] font-bold">${dayNum}</span>
+                                    <span class="text-[10px] opacity-40">○</span>
+                                </button>
+                            `;
+                        }
+                    }).join('');
+
+                    grid.querySelectorAll('.cal-day-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const idx = Number(btn.getAttribute('data-day-idx'));
+                            state.calendarDays[idx] = !state.calendarDays[idx];
+                            saveState();
+                            renderAll();
+                            const statusMsg = state.calendarDays[idx]
+                                ? `Hari ke-${idx + 1} ditanda selesai ⭐!`
+                                : `Tanda Hari ke-${idx + 1} dibuang.`;
+                            showToast(statusMsg, 'pink');
+                        });
+                    });
+                });
+            }
+
+            // 3. RENDER STICKERS (Mini Album + Full Album)
+            function renderStickers() {
+                const unlockedTotal = state.stickers.filter(s => s.unlocked).length;
+                const badge = document.getElementById('stickerCountBadge');
+                if (badge) badge.textContent = `${unlockedTotal} / ${state.stickers.length}`;
+
+                // Mini Grid (Utama)
+                const miniGrid = document.getElementById('stickerAlbumGrid');
+                if (miniGrid) {
+                    miniGrid.innerHTML = state.stickers.map(st => {
+                        const isEquipped = st.unlocked && state.featuredStickerEmoji === st.emoji;
+                        if (st.unlocked) {
+                            return `
+                                <button type="button" data-equip-id="${st.id}" class="equip-sticker-btn relative p-2.5 rounded-2xl bg-white border-2 ${isEquipped ? 'border-pink-500 ring-2 ring-pink-200' : 'border-purple-100 hover:border-pink-300'} flex flex-col items-center justify-center text-center transition cursor-pointer" title="Klik untuk pakai sticker ini">
+                                    ${st.count > 1 ? `<span class="absolute -top-1.5 -right-1.5 bg-purple-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">x${st.count}</span>` : ''}
+                                    ${isEquipped ? `<span class="absolute -top-1.5 -left-1.5 bg-pink-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">Dipakai</span>` : ''}
+                                    <span class="text-2xl mb-1">${st.emoji}</span>
+                                    <span class="text-[10px] font-bold text-slate-700 leading-tight truncate w-full">${st.name}</span>
+                                </button>
+                            `;
+                        } else {
+                            return `
+                                <div class="p-2.5 rounded-2xl bg-slate-100/70 border border-dashed border-slate-300 flex flex-col items-center justify-center text-center opacity-60">
+                                    <span class="text-2xl mb-1 grayscale blur-[1px]">❓</span>
+                                    <span class="text-[10px] font-bold text-slate-400">???</span>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+
+                    miniGrid.querySelectorAll('.equip-sticker-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            equipSticker(Number(btn.getAttribute('data-equip-id')));
+                        });
+                    });
+                }
+
+                // Full Grid (Tab Koleksi Sticker)
+                const fullGrid = document.getElementById('fullStickerAlbumGrid');
+                if (fullGrid) {
+                    fullGrid.innerHTML = state.stickers.map(st => {
+                        const isEquipped = st.unlocked && state.featuredStickerEmoji === st.emoji;
+                        const rarityColor = st.rarity === 'Legendary'
+                            ? 'bg-amber-100 text-amber-700'
+                            : st.rarity === 'Rare'
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-emerald-100 text-emerald-700';
+
+                        if (st.unlocked) {
+                            return `
+                                <div class="p-5 rounded-3xl bg-white border-2 ${isEquipped ? 'border-pink-500 shadow-md' : 'border-pink-100'} flex flex-col items-center text-center relative">
+                                    <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${rarityColor} mb-2">${st.rarity}</span>
+                                    <div class="w-20 h-20 rounded-2xl bg-pink-50 flex items-center justify-center text-5xl my-2 animate-float">
+                                        ${st.emoji}
+                                    </div>
+                                    <h4 class="font-cute font-bold text-base text-slate-800">${st.name}</h4>
+                                    <span class="text-xs text-slate-400 mb-3">Dimiliki: ${st.count}x</span>
+                                    <button type="button" data-equip-id="${st.id}" class="equip-sticker-btn w-full py-2 rounded-xl text-xs font-bold transition cursor-pointer ${isEquipped ? 'bg-pink-100 text-pink-600' : 'bg-purple-600 hover:bg-purple-700 text-white'}">
+                                        ${isEquipped ? '💖 Sedang Dipakai' : '✨ Jadikan Badge'}
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div class="p-5 rounded-3xl bg-slate-100/70 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center opacity-65">
+                                    <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-500 mb-2">${st.rarity}</span>
+                                    <div class="w-20 h-20 rounded-2xl bg-slate-200/60 flex items-center justify-center text-4xl my-2">
+                                        🔒
+                                    </div>
+                                    <h4 class="font-cute font-bold text-base text-slate-500">Sticker Misteri</h4>
+                                    <span class="text-xs text-slate-400 mt-1">Spin Gacha untuk buka!</span>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+
+                    fullGrid.querySelectorAll('.equip-sticker-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            equipSticker(Number(btn.getAttribute('data-equip-id')));
+                        });
+                    });
+                }
+            }
+
+            function equipSticker(stickerId) {
+                const st = state.stickers.find(s => s.id === stickerId && s.unlocked);
+                if (!st) return;
+
+                state.featuredStickerEmoji = st.emoji;
+                saveState();
+                renderAll();
+                showToast(`Badge profil ditukar kepada ${st.emoji} ${st.name}!`, 'purple');
+            }
+
+            // 4. RENDER LEADERBOARDS (Sidebar + Full Page)
+            function renderLeaderboards() {
+                // Sort friends by stars descending
+                const sorted = [...state.friends].sort((a, b) => b.stars - a.stars);
+
+                const containers = [
+                    document.getElementById('leaderboardList'),
+                    document.getElementById('fullLeaderboardList')
+                ];
+
+                containers.forEach((container, cIdx) => {
+                    if (!container) return;
+                    const isFull = cIdx === 1;
+
+                    container.innerHTML = sorted.map((person, index) => {
+                        const rankBadge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+                        const highlightClass = person.isMe
+                            ? 'bg-gradient-to-r from-pink-50 to-purple-50 border-2 border-pink-300'
+                            : 'bg-white/90 border border-slate-100';
+
+                        const nudgeBtn = !person.isMe
+                            ? `<button type="button" data-nudge-name="${person.name}" class="nudge-friend-btn text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-700 px-2.5 py-1.5 rounded-xl transition cursor-pointer" title="Hantar Semangat">
+                                   ⚡ ${isFull ? 'Hantar Semangat' : ''}
+                               </button>`
+                            : `<span class="text-[10px] font-bold text-pink-500 bg-pink-100 px-2 py-0.5 rounded-full">Awak</span>`;
+
+                        return `
+                            <div class="flex items-center justify-between gap-2.5 p-3 rounded-2xl ${highlightClass} shadow-sm">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span class="font-cute font-bold text-sm w-6 text-center shrink-0">${rankBadge}</span>
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br ${person.avatarBg} flex items-center justify-center text-white font-bold text-sm shrink-0 relative">
+                                        ${person.initial}
+                                        <span class="absolute -bottom-1 -right-1 text-xs bg-white rounded-full shadow px-0.5">${person.badge || '⭐'}</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-bold text-xs sm:text-sm text-slate-800 truncate">${person.name}</h4>
+                                        <p class="text-[11px] text-slate-500 truncate">${person.status}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <div class="text-right">
+                                        <span class="font-cute font-bold text-sm text-amber-600 block">${person.stars} ⭐</span>
+                                        <span class="text-[10px] font-semibold text-orange-500">🔥 ${person.streak}d</span>
+                                    </div>
+                                    ${nudgeBtn}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    container.querySelectorAll('.nudge-friend-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const friendName = btn.getAttribute('data-nudge-name');
+                            showToast(`⚡ Semangat dihantar kepada ${friendName}! "Jom siapkan target hari ni!"`, 'purple');
+                        });
+                    });
+                });
+            }
+
+            // --- MYSTERY BOX GACHA FUNCTION ---
+            function triggerGachaSpin() {
+                if (state.stars < 3) {
+                    showToast('Bintang tak cukup! Perlukan 3 ⭐ untuk buka Mystery Box.', 'error');
+                    return;
+                }
+
+                // Deduct 3 stars
+                state.stars -= 3;
+                saveState();
+                updateStatsHeader();
+
+                // Open reveal modal in shaking state
+                const badgeEl = document.getElementById('revealedRarityBadge');
+                const emojiEl = document.getElementById('revealedStickerEmoji');
+                const nameEl = document.getElementById('revealedStickerName');
+                const descEl = document.getElementById('revealedStickerDesc');
+                const closeBtn = document.getElementById('closeRevealBtn');
+
+                badgeEl.textContent = '🎁 SEDANG MEMBUKA...';
+                badgeEl.className = 'inline-block text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-purple-100 text-purple-700 mb-3';
+                emojiEl.textContent = '🎁';
+                emojiEl.classList.remove('animate-float');
+                emojiEl.classList.add('animate-gacha-shake');
+                nameEl.textContent = 'Berdebar-debar...';
+                descEl.textContent = 'Kotak misteri sedang bergegar!';
+                closeBtn.disabled = true;
+                closeBtn.classList.add('opacity-50');
+
+                openModal('stickerRevealModal');
+
+                setTimeout(() => {
+                    // Pick random sticker (weighted slightly towards unowned stickers for fun)
+                    const unowned = state.stickers.filter(s => !s.unlocked);
+                    let chosen;
+                    if (unowned.length > 0 && Math.random() < 0.7) {
+                        chosen = unowned[Math.floor(Math.random() * unowned.length)];
+                    } else {
+                        chosen = state.stickers[Math.floor(Math.random() * state.stickers.length)];
+                    }
+
+                    const isNew = !chosen.unlocked;
+                    chosen.unlocked = true;
+                    chosen.count += 1;
+
+                    saveState();
+                    renderAll();
+
+                    // Stop shake & reveal
+                    emojiEl.classList.remove('animate-gacha-shake');
+                    emojiEl.classList.add('animate-float');
+                    emojiEl.textContent = chosen.emoji;
+
+                    badgeEl.textContent = isNew
+                        ? `✨ BARU! ${chosen.rarity.toUpperCase()}`
+                        : `💖 KOLEKSI (${chosen.count}x) • ${chosen.rarity.toUpperCase()}`;
+                    badgeEl.className = 'inline-block text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-100 text-amber-700 mb-3';
+
+                    nameEl.textContent = chosen.name;
+                    descEl.textContent = isNew
+                        ? 'Tahniah Afif! Sticker comel baru dah masuk dalam Buku Koleksi!'
+                        : 'Awak dah ada sticker ni, jumlah koleksi bertambah +1!';
+
+                    closeBtn.disabled = false;
+                    closeBtn.classList.remove('opacity-50');
+
+                    fireConfetti();
+                }, 1100);
+            }
+
+            document.getElementById('spinGachaBtn')?.addEventListener('click', triggerGachaSpin);
+            document.getElementById('spinGachaBtnFull')?.addEventListener('click', triggerGachaSpin);
+
+            // --- STREAK PET ("MOCHI") INTERACTION ---
+            const mochiQuotes = [
+                "\"Hehe geli la Afif! Teruskan semangat hari ni tau~ 🐰💖\"",
+                "\"Yammy dah baca buku ke tu? Jom ajak dia sekali! 📖\"",
+                "\"Mochi sayang Afif! Kumpul banyak star tau~ ✨\"",
+                "\"Nyum nyum! Mochi makin gembira bila Afif konsisten! 🍓\""
+            ];
+
+            function boostMochi(expGain = 15) {
+                state.mochiExp += expGain;
+                if (state.mochiExp >= 100) {
+                    state.mochiLevel += 1;
+                    state.mochiExp = state.mochiExp - 100;
+                    showToast(`🎉 Mochi naik ke Level ${state.mochiLevel}!`, 'purple');
+                }
+            }
+
+            function handlePetMochi() {
+                boostMochi(12);
+                saveState();
+                updateStatsHeader();
+
+                // Random quote
+                const moodEl = document.getElementById('petMoodText');
+                if (moodEl) {
+                    moodEl.textContent = mochiQuotes[Math.floor(Math.random() * mochiQuotes.length)];
+                }
+
+                // Floating heart effect
+                const stage = document.getElementById('petStageContainer');
+                if (stage) {
+                    const heart = document.createElement('span');
+                    heart.textContent = ['💖', '✨', '🌸', '⭐'][Math.floor(Math.random() * 4)];
+                    heart.className = 'heart-pop absolute top-2 right-6 text-2xl pointer-events-none';
+                    stage.appendChild(heart);
+                    setTimeout(() => heart.remove(), 900);
+                }
+            }
+
+            document.getElementById('petMochiBtn')?.addEventListener('click', handlePetMochi);
+            document.getElementById('petStageContainer')?.addEventListener('click', handlePetMochi);
+
+            // --- ADD NEW HABIT FORM ---
+            document.getElementById('openAddHabitBtn')?.addEventListener('click', () => {
+                openModal('addHabitModal');
+            });
+
+            document.getElementById('addHabitForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const titleInput = document.getElementById('newHabitTitle');
+                const iconInput = document.getElementById('newHabitIcon');
+                const sharedInput = document.getElementById('newHabitShared');
+
+                const title = titleInput.value.trim();
+                if (!title) return;
+
+                const newHabit = {
+                    id: Date.now(),
+                    title: title,
+                    icon: iconInput.value,
+                    sharedWith: sharedInput.value,
+                    friendDoneToday: sharedInput.value !== 'Solo',
+                    claimedToday: false,
+                    streakDays: 1
+                };
+
+                state.habits.unshift(newHabit);
+                saveState();
+                renderAll();
+
+                titleInput.value = '';
+                closeModal('addHabitModal');
+                showToast(`Target "${title}" berjaya ditambah! ✨`, 'emerald');
+            });
+
+            // --- INVITE & ADD FRIEND SYSTEM ---
+            document.getElementById('openInviteBtn')?.addEventListener('click', () => openModal('inviteModal'));
+            document.getElementById('openInviteBtn2')?.addEventListener('click', () => openModal('inviteModal'));
+
+            function copyInviteCode() {
+                const code = 'BLOOM-AFIF88';
+                // Reliable clipboard copy for iframes
+                const tempInput = document.createElement('input');
+                tempInput.value = code;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+
+                showToast('📋 Kod BLOOM-AFIF88 berjaya disalin!', 'purple');
+            }
+
+            document.getElementById('copyInviteCodeBtn')?.addEventListener('click', copyInviteCode);
+            document.getElementById('copyCodeBtnPage')?.addEventListener('click', copyInviteCode);
+
+            function addNewFriend(rawInput) {
+                let clean = rawInput.trim();
+                if (!clean) return;
+
+                // Extract nice name if user enters code like BLOOM-SARA22
+                let displayName = clean;
+                if (clean.toUpperCase().startsWith('BLOOM-')) {
+                    const part = clean.substring(6).replace(/[0-9]/g, '');
+                    displayName = part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : clean;
+                }
+
+                const avatarGradients = [
+                    'from-pink-400 to-purple-400',
+                    'from-sky-400 to-indigo-400',
+                    'from-rose-400 to-orange-400',
+                    'from-teal-400 to-emerald-500'
+                ];
+
+                const newFriend = {
+                    id: 'f_' + Date.now(),
+                    name: `${displayName} ✨`,
+                    stars: Math.floor(Math.random() * 12) + 12,
+                    streak: Math.floor(Math.random() * 7) + 3,
+                    avatarBg: avatarGradients[Math.floor(Math.random() * avatarGradients.length)],
+                    initial: displayName.charAt(0).toUpperCase(),
+                    badge: ['🐱', '🧸', '🦕', '🐶'][Math.floor(Math.random() * 4)],
+                    isMe: false,
+                    status: 'Baru join cabaran 30 hari! 🌸'
+                };
+
+                state.friends.push(newFriend);
+                saveState();
+                renderAll();
+                showToast(`👯‍♀️ ${displayName} berjaya ditambah ke senarai kawan!`, 'emerald');
+            }
+
+            document.getElementById('addFriendModalForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.getElementById('friendCodeInputModal');
+                addNewFriend(input.value);
+                input.value = '';
+                closeModal('inviteModal');
+            });
+
+            document.getElementById('addFriendPageForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.getElementById('friendInputPage');
+                addNewFriend(input.value);
+                input.value = '';
+            });
+
+            // --- DEMO RESET BUTTON ---
+            document.getElementById('resetDemoBtn')?.addEventListener('click', () => {
+                state.habits.forEach(h => h.claimedToday = false);
+                state.streakClaimedToday = false;
+                saveState();
+                renderAll();
+                showToast('🔄 Status claim hari ini di-reset untuk demo!', 'pink');
+            });
+
+            // Initial Render on Load
+            renderAll();
+        });
+    </script>
+</body>
+</html>
